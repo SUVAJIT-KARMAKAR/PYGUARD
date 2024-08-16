@@ -2,13 +2,17 @@
 # SUVAJIT KARMAKAR 
 
 # IMPORTING THE REQUIRED MODULES IN THE WORK DIRECTORY 
+import os
 import random
 import string
 import streamlit as st
 import time
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, PyMongoError
+from dotenv import load_dotenv
 
+# LOADING THE .env FILE
+load_dotenv()
 
 # CONFIGURATION
 st.set_page_config(
@@ -83,17 +87,19 @@ if st.button("GET YOUR PASSWORD"):
     st.write("WHAT TO DO NEXT ?")
     st.code(generated_password)
 
-    # DATABASE CONNECTION
-    client = MongoClient("mongodb://localhost:27017/")
-    db = client["pyguard"]
-    collection = db["credentials"]
+    # DATABASE CONNECTION USING ENVIRONMENT VARIABLES
+    mongo_uri = os.getenv("MONGODB_URI")
+    db_name = os.getenv("MONGODB_DB_NAME")
+    collection_name = os.getenv("MONGODB_COLLECTION_NAME")
+
+    client = MongoClient(mongo_uri)
+    db = client[db_name]
+    collection = db[collection_name]
 
     # STORING DATA 
     password_data = {
         "password": generated_password,
         "application": app_name,
-        # "use_digits": use_digits,
-        # "use_special_chars": use_special_chars
     }
 
     collection.insert_one(password_data)
